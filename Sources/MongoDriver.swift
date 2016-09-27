@@ -54,7 +54,10 @@ public class MongoDriver: Fluent.Driver {
             return Node.null
         case .modify:
             try modify(query)
-            return query.data ?? Node.null
+            if let data = query.data, let result = try? [data].makeNode() {
+                return result
+            }
+            return Node.null
         }
     }
     
@@ -127,6 +130,9 @@ public class MongoDriver: Fluent.Driver {
         var document: Document = [:]
 
         for (key, val) in data {
+            if key == idKey {
+                continue
+            }
             document[key] = val.bson
         }
 
